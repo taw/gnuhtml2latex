@@ -1,0 +1,51 @@
+=head1 NAME
+
+gnuhtml2latex - konwerter HTML'a na LaTeX'a
+
+=head1 SYNOPSIS
+
+B<gnuhtml2latex> F<[opcje]> F<plik>
+
+F<-a> F<[autor]>  - autor dokumentu
+
+F<-c>          - u¿yj spisu tre¶ci
+
+F<-f> F<[stopka]> - stopka
+
+F<-h> F<[nag³ówek]> - nag³ówek
+
+F<-n>          - numeruj sekcje
+
+F<-o> F<[klasa]>  - klasa dokumentu
+
+F<-p>          - skoñcz stronê po tytule / spisie tre¶ci
+
+F<-s>          - pisz do stdout
+
+F<-t> F<[tytu³]>  - tytu³ dokumentu
+
+=head1 DESCRIPTION
+
+Ten program jest w zamierzeniu wolnodostêpnym nastêpc± html2latex.
+
+Program bierze HTML'owy plik foo.html albo foo.htm
+i tworzy z niego LaTeX'owy plik foo.tex
+
+=head1 NIEZBYT AMBITNE TODO
+
+Dla tych, którzy chc± jedynie mo¿liwo¶ci html2latex
+
+ naprawienie wszystkich b³êdów
+ wiêcej znaczków z poza iso-8859-1
+ tabele
+ performance
+ i wiele innych
+
+=head1 BARDZIEJ AMBITNE TODO
+
+Dla tych, którzy chc± prawdziwego narzêdzia
+
+ w³±czyæ to do jakiego¶ procesora HTML'a
+ przepisaæ we flex'ie
+
+=cut

@@ -1,0 +1,14 @@
+Build-Depends: debhelper
+Source: gnuhtml2latex
+Section: text
+Priority: optional
+Maintainer: Tomasz Wegrzanowski <Tomasz.Wegrzanowski@gmail.com>
+Standards-Version: 3.1.1
+
+Package: gnuhtml2latex
+Architecture: all
+Depends: ${perl:Depends}, libhtml-parser-perl
+Description: A Perl script that converts HTML files to LaTeX
+ gnuhtml2latex is a Perl script that converts HTML files to LaTeX
+ files. It takes list of .html files as arguments and make .tex
+ ones.  Can also convert HTML stdin to LaTeX stdout.

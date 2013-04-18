@@ -1,0 +1,57 @@
+=head1 NAME
+
+gnuhtml2latex - HTML to LaTeX converter
+
+=head1 SYNOPSIS
+
+B<gnuhtml2latex> F<[options]> F<filename>
+
+F<-a> F<[author]> - specify author of document 
+
+F<-c>          - use table of contents
+
+F<-f> F<[string]> - specify footer
+
+F<-h> F<[string]> - specify header
+
+F<-n>          - use numbered sections
+
+F<-o> F<[string]> - specify document class
+
+F<-p>          - break page after title / table of contents
+
+F<-s>          - write to stdout
+
+F<-t> F<[title]>  - specify title of document
+
+=head1 DESCRIPTION
+
+This aims to be replacement of html2latex.
+
+Program takes HTML file foo.html or foo.htm file
+and makes LaTeX file foo.tex from it
+
+=head1 NOT VERY AMBITIOUS TODO
+
+For people who want only functionality of original html2latex
+
+ bugfixes - I'm sure there is plenty of bugs inside
+ more entities from outside of iso-8859-1
+ tables
+ performance boost
+ and a lot more
+
+=head1 MORE AMBITIOUS TODO
+
+For people who want a real tool
+
+ make it part of some HTML processor
+ rewrite in flex
+
+=head1 FUTURE OF THIS PACKAGE
+
+This is very possible that functions of this package will be included
+to some more general project. This package was made mainly to make world
+a bit more free.
+
+=cut

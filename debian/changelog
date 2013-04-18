@@ -1,0 +1,35 @@
+gnuhtml2latex (0.4) unstable; urgency=low
+
+  * More clueful special characters handling (closes:Bug#65589)
+
+ -- Tomasz Wegrzanowski <Tomasz.Wegrzanowski@gmail.com>  Mon, 24 Jul 2000 10:44:12 +0200
+
+gnuhtml2latex (0.3) unstable; urgency=low
+
+  * Polish manpage
+  * Improved internal organization
+
+ -- Tomasz Wegrzanowski <Tomasz.Wegrzanowski@gmail.com>  Sat, 11 Jun 2000 11:08:42 +0200
+
+gnuhtml2latex (0.2) unstable; urgency=low
+
+  * [debian/control]: Updated to Standards-Version: 3.1.1 and added
+      Build-Depends: debhelper.
+  * Now produces files in LaTeX2e instead of the obsolete LaTeX 2.09 format.
+  * Fixed some cases where "\\" (linebreak) occurs by itself in an empty
+    paragraph.  (LaTeX Error: There's no line here to end.)
+  * Improved handling of &nbsp; and other ISO-8859-1 characters.
+  * Added support for tags such as HR, BLOCKQUOTE, SUP, SUB, etc.
+
+ -- Tomasz Wegrzanowski <Tomasz.Wegrzanowski@gmail.com>  Sat, 10 Jun 2000 01:35:22 -0600
+
+gnuhtml2latex (0.1) unstable; urgency=low
+
+  * Initial Release
+
+ -- Tomasz Wegrzanowski <Tomasz.Wegrzanowski@gmail.com>  Wed, 22 Dec 1999 23:58:00 +0100
+
+Local variables:
+mode: debian-changelog
+add-log-mailing-address: "Tomasz.Wegrzanowski@gmail.com"
+End:

@@ -1,0 +1,239 @@
+#!/usr/bin/perl -w
+# gnuhtml2latex html to latex converter
+# Copyright (c) 1999-2000 Tomasz Wêgrzanowski <Tomasz.Wegrzanowski@gmail.com>
+#
+# gnuhtml2latex is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# On Debian GNU/Linux systems, the complete text of the GNU General
+# Public License can be found in `/usr/share/common-licenses/GPL'.
+
+# This software is quite alpha
+
+use strict;
+use Getopt::Std;
+
+getopts('a:cf:h:no:pst:',\%main::opts);
+unless (defined $main::opts{o}) { $main::opts{o} = '{article}' }
+unless (defined $main::opts{h}) { $main::opts{h} = '' }
+unless (defined $main::opts{f}) { $main::opts{f} = '' }
+$main::num = ($main::opts{n})?'':'*';
+
+{
+my %tagstable_start = (
+'p' => "\n\n",
+'b' => '\\textbf{',
+'i' => '\\textit{',
+'u' => '\\underline{',
+'dt' => '\\item[',
+'dd' => ']',
+'br' => "\\\\\n",
+'em' => '\\emph{',
+'h1' => "\n\\section${main::num}\{",
+'h2' => "\n\\subsection${main::num}\{",
+'h3' => "\n\\subsubsection${main::num}\{",
+'h4' => "\n\\paragraph${main::num}\{",
+'h5' => "\n\\subparagraph${main::num}\{",
+'h6' => "\n\\subparagraph${main::num}\{",
+'li' => "\n\\item ",
+'ul' => "\n\\begin{itemize}",
+'ol' => "\n\\begin{enumerate}",
+'dl' => "\n\\begin{description}",
+'tt' => '\\texttt{',
+'kbd' => '\\texttt{\\textbf{',
+'var' => '\\textit{',
+'dfn' => '\\textbf{\\textit{',
+'cite' => '\\textsc{',
+'samp' => '\\texttt{',
+'address' => "\n\n\\noindent\\textit{",
+'strong' => '\\textbf{',
+'listing' => "\n\\begin{verbatim}\n",
+# 'table' => "% \\begin{tabular}{???}\n",
+'th' => '\\textbf{',
+'center' => "\n\\begin{center}\n",
+'sup' => '\\textsuperscript{',
+'sub' => '\\textsubscript{',
+'hr' => "\n\n\\medskip\\hrule\\medskip\n\n",
+'blockquote' => "\n\\begin{quote}\n",
+'div' => "\n"
+);
+
+my %tagstable_end = (
+'p' => "\n",
+'b' => '}',
+'i' => '}',
+'u' => '}',
+'em' => '}',
+'h1' => '}',
+'h2' => '}',
+'h3' => '}',
+'h4' => '}',
+'h5' => '}',
+'h6' => '}',
+'tt' => '}',
+'kbd' => '}}',
+'var' => '}',
+'dfn' => '}}',
+'cite' => '}',
+'samp' => '}',
+'address' => '}',
+'strong' => '}',
+'ul' => "\n\\end{itemize}\n",
+'ol' => "\n\\end{enumerate}\n",
+'dl' => "\n\\end{description}\n",
+'listing' => "\n\\end{verbatim}\n",
+# 'table' => "% \\end{tabular}\n",
+'td' => ' ',
+'th' => '} ',
+# 'tr' => "\n",
+'center' => "\n\\end{center}\n",
+'sup' => '}',
+'sub' => '}',
+'blockquote' => "\n\\end{quote}\n",
+'div' => "\n"
+);
+
+my $mode = 0;
+package HTML::LatexMaker;
+use HTML::Parser;
+use HTML::Entities;
+@HTML::LatexMaker::ISA = ( "HTML::Parser" );
+1;
+
+sub start {
+    my ( $self, $tag, $attr, $attrseq ) = @_;
+    if ( $tag eq 'html' ) { start_mode(1); return }
+    elsif ( $tag eq 'head' ) { start_mode(2); return }
+    elsif ( $tag eq 'body' ) { start_mode(3); return }
+    return unless( $mode == 3 and defined $tagstable_start{$tag} );
+#    if ($tag eq 'br' and $main::newpar = 1) {
+#	print "\\bigskip\n";
+#    } else {
+	print $tagstable_start{$tag};
+#	$main::newpar = 0 if $tag ne 'br';
+#    }
+}
+
+sub end {
+    my ( $self, $tag ) = @_;
+    if ( $tag eq 'html' ) { end_mode(0); return }
+    elsif ( $tag eq 'head' ) { end_mode(1); return }
+    elsif ( $tag eq 'body' ) { end_mode(1); return }
+    return unless( $mode == 3 and defined $tagstable_end{$tag} );
+    print $tagstable_end{$tag};
+}
+
+sub text {
+    my ( $self, $text ) = @_;
+    return unless( $mode == 3 );
+
+    # Handle some things that decode_entities doesn't.
+    # (This needs to be done *before* calling decode_entities: otherwise
+    # there'd be no way of distinguishing `&FOO;' from `&amp;FOO;'.)
+
+    # We use `!' for internal purposes during entity translation.
+    $text =~ s/!|&\#(?:0*33|x0*21);/!bang;/g;
+
+    # Handle `&lsquo;&ldquo;', `&ndash;&mdash;' and so on by inserting
+    # thin space between the translations in such cases.
+    $text =~ s/&\#(?:x0*2d|0*45);/-/g;
+    $text =~ s/(&mdash;|&ndash;|-)(?=(?:&mdash;|&ndash;|-))/$1!thinsp;/g;
+    $text =~ s/(&[lr][sd]quo;)(?=(?:&[lr][sd]quo;))/$1!thinsp;/g;
+
+    # There are many things that decode_entities doesn't handle.
+    # A few of those things we handle ourselves.  The final replacement
+    # happens later (so that we correctly handle the various quotes
+    # whether they're literal, numeric character ref, or symbolic ref).
+    # In the meantime we change from `&FOO;' to `!FOO;'.
+    $text =~ s/&([mn]dash|[lr][sd]quo|hellip);/!$1;/g;
+
+    decode_entities($text);
+
+    $text =~ s/\\/!backslash;/g;
+    $text =~ s/([~`'"]+)/!verb|$1|/g;  #`;
+    $text =~ s/([_&%\{\}#])/\\$1/g;
+    $text =~ s/\$/\\\$/g;
+    $text =~ s/\^/\\^{}/g;
+    $text =~ s/!backslash;/\$\\backslash\$/g;
+    $text =~ s/!mdash;/---/g;
+    $text =~ s/!ndash;/--/g;
+    $text =~ s/!lsquo;/`/g;  #`;
+    $text =~ s/!rsquo;/'/g;  #';
+    $text =~ s/!ldquo;/``/g;
+    $text =~ s/!rdquo;/''/g;
+    $text =~ s/!hellip;/\ldots{}/g;
+    $text =~ s/!thinsp;/\$\\,\$/g;
+    $text =~ s/!verb\|/\\verb|/g;
+    $text =~ s/!bang;/!/g;
+    $text =~ s/\xa0/~/g;
+    $text =~ s/(^|\s)"/$1``/g;		# Open double quotation marks
+    $text =~ s/"/''/g;			# Close double quotatio marks
+    $text =~ s/(^|\s)'/$1`/g;		# Open single quotation marks
+    $text =~ s/(?<!-)--(?!-)/---/g;	# em-dash
+    $text =~ s/\xA0/~/g;	# Non-breaking space
+    $text =~ s/^\n+//g;		# Trim preceding newlines
+    $text =~ s/\n+$/\n/g;       # Trim trailing newlines
+    $text =~ s/^\n+$//g;	# If all that's left is newline, empty it
+    print $text;
+    # $main::newpar = 1 if $text =~ /\n\s*?\n\s*?/;
+}
+
+sub start_mode {
+    my ( $mode_new ) = @_;
+    if ( $mode_new == 1 ) {
+	print <<"EOC";
+% This file was converted from HTML to LaTeX with
+% Tomasz Wegrzanowski\'s <Tomasz.Wegrzanowski\@gmail.com> gnuhtml2latex program
+% Version : $main::version
+
+\\documentclass$main::opts{o}
+
+\\usepackage[latin1]{inputenc}
+\\usepackage[T1]{fontenc}
+
+\\newcommand{\\textsubscript}[1]{\\ensuremath{_{\\mbox{\\scriptsize #1}}}}
+
+EOC
+    }
+    if ( $mode_new == 3) {
+	print ('\begin{document}'."\n".$main::opts{h});
+
+	if ( defined $main::opts{a} or defined $main::opts{t}
+	     or defined $main::opts{c} ){
+	    if ( defined $main::opts{a} or defined $main::opts{t} ) {
+		if ( $main::opts{t} ) { print ('\\title{'.$main::opts{t}.'}') }
+		print ( '\\author{'.($main::opts{a} or '')."}\n\\maketitle" );
+	    }
+	    if ( $main::opts{c} ) { print "\n\\tableofcontents" }
+	}
+	if ( $main::opts{p} ) { print "\n\\newpage" }
+    }
+    $mode = $mode_new;
+}
+
+sub end_mode {
+    my ( $mode_new ) = @_;
+    if ( $mode == 3 ) {
+	print ($main::opts{f}."\n".'\end{document}'."\n");
+    }
+    $mode = $mode_new;
+}
+
+}
+
+$main::version = '0.4';
+# $main::newpar = 0;
+foreach my $filename (@ARGV) {
+    unless ( open(FILE, $filename) ) {
+	warn "$filename: $!";
+	next;
+    }
+    $filename =~ s/\.html?$//;
+    my $outfile = $filename.".tex";
+    unless ( $main::opts{s} ) { open STDOUT,">$outfile" }
+    my $doc = new HTML::LatexMaker;
+    $doc->parse_file (\*FILE);
+    close FILE;
+}
