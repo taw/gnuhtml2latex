@@ -14,6 +14,7 @@
 
 use strict;
 use Getopt::Std;
+use feature 'unicode_strings';
 
 getopts('a:cf:h:no:pst:',\%main::opts);
 unless (defined $main::opts{o}) { $main::opts{o} = '{article}' }
@@ -190,7 +191,7 @@ sub start_mode {
 
 \\documentclass$main::opts{o}
 
-\\usepackage[latin1]{inputenc}
+\\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 
 \\newcommand{\\textsubscript}[1]{\\ensuremath{_{\\mbox{\\scriptsize #1}}}}
